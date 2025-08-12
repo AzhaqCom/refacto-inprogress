@@ -15,6 +15,79 @@
   padding: var(--spacing-sm);
 }
 
+/* === ÉTATS DE CHARGEMENT ET D'ERREUR === */
+
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+  padding: var(--spacing-xl);
+}
+
+.loading-state h3 {
+  color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-md);
+}
+
+.loading-state p {
+  color: var(--color-text-muted);
+}
+
+.game-end {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+  padding: var(--spacing-xl);
+}
+
+.game-end h2 {
+  color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-md);
+}
+
+.game-end p {
+  color: var(--color-text-muted);
+  margin-bottom: var(--spacing-lg);
+}
+
+.rest-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  height: 100%;
+}
+
+/* === SIDEBAR RESPONSIVE === */
+
+.sidebar--collapsed {
+  transform: translateX(100%);
+  transition: transform var(--transition-normal);
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    top: 0;
+    right: 0;
+    height: 100vh;
+    z-index: 1000;
+    background: var(--color-bg-secondary);
+    border-left: 2px solid var(--color-border-primary);
+    transform: translateX(0);
+    transition: transform var(--transition-normal);
+  }
+  
+  .sidebar--collapsed {
+    transform: translateX(100%);
+  }
+}
+
 /* === SYSTÈME DE GRILLE === */
 
 .grid {

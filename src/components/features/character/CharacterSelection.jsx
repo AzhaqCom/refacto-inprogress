@@ -1,30 +1,16 @@
 import React, { useState } from 'react'
 import { useGameStore, useCharacterStore } from '../../../stores'
 import { characterTemplates } from '../../../data/characterTemplates'
-import { 
-  Card, 
-  CardHeader, 
-  CardBody, 
-  CardFooter,
-  Button,
-  Modal,
-  useModal,
-  LoadingIndicator
-} from '../../ui'
-import { CharacterSelectionCard } from './CharacterSelectionCard'
-import { CompactCharacterSheet } from './CharacterSheet'
+import CharacterSelectionCard from './CharacterSelectionCard'
 
 /**
  * Écran de sélection de personnage modernisé
  */
-export const CharacterSelection = ({ onCharacterSelect }) => {
+const CharacterSelection = ({ onCharacterSelect }) => {
   const [selectedCharacter, setSelectedCharacter] = useState(null)
-  const [isConfirming, setIsConfirming] = useState(false)
   
   const setGamePhase = useGameStore(state => state.setGamePhase)
   const setPlayerCharacter = useCharacterStore(state => state.setPlayerCharacter)
-  
-  const { openModal, closeModal } = useModal()
 
   // Personnages disponibles (peut être étendu dynamiquement)
   const availableCharacters = [
@@ -37,32 +23,17 @@ export const CharacterSelection = ({ onCharacterSelect }) => {
     setSelectedCharacter(character)
   }
 
-  const handlePreviewCharacter = (character) => {
-    openModal('character-preview', character)
-  }
-
-  const handleConfirmSelection = async () => {
+  const handleConfirmSelection = () => {
     if (!selectedCharacter) return
 
-    setIsConfirming(true)
+    // Initialiser le personnage dans le store
+    setPlayerCharacter(selectedCharacter)
     
-    try {
-      // Simuler un délai de chargement pour l'expérience utilisateur
-      await new Promise(resolve => setTimeout(resolve, 500))
-      
-      // Initialiser le personnage dans le store
-      setPlayerCharacter(selectedCharacter)
-      
-      // Callback externe si fourni
-      onCharacterSelect?.(selectedCharacter)
-      
-      // Changer de phase de jeu
-      setGamePhase('game')
-    } catch (error) {
-      console.error('Erreur lors de la sélection du personnage:', error)
-    } finally {
-      setIsConfirming(false)
-    }
+    // Callback externe si fourni
+    onCharacterSelect?.(selectedCharacter)
+    
+    // Changer de phase de jeu
+    setGamePhase('game')
   }
 
   const getCharacterDescription = (character) => {
@@ -102,128 +73,50 @@ export const CharacterSelection = ({ onCharacterSelect }) => {
             key={`${character.name}-${index}`}
             character={character}
             isSelected={selectedCharacter?.name === character.name}
-            onSelect={() => handleCharacterSelect(character)}
-            onPreview={() => handlePreviewCharacter(character)}
-            icon={getClassIcon(character.class)}
-            description={getCharacterDescription(character)}
+            onSelect={handleCharacterSelect}
           />
         ))}
       </div>
 
       {selectedCharacter && (
         <div className="character-selection__confirmation">
-          <Card className="character-selection__selected-info">
-            <CardHeader>
-              <h3>
-                {getClassIcon(selectedCharacter.class)} {selectedCharacter.name}
-              </h3>
-              <p>{selectedCharacter.level}e niveau {selectedCharacter.race} {selectedCharacter.class}</p>
-            </CardHeader>
+          <h3>À propos de {selectedCharacter.name}</h3>
+          <p>{getCharacterDescription(selectedCharacter)}</p>
+          
+          <div className="character-stats-detailed">
+            <div className="stats-column">
+              <h4>Caractéristiques</h4>
+              <ul>
+                <li>Force: {selectedCharacter.stats.force}</li>
+                <li>Dextérité: {selectedCharacter.stats.dexterite}</li>
+                <li>Constitution: {selectedCharacter.stats.constitution}</li>
+                <li>Intelligence: {selectedCharacter.stats.intelligence}</li>
+                <li>Sagesse: {selectedCharacter.stats.sagesse}</li>
+                <li>Charisme: {selectedCharacter.stats.charisme}</li>
+              </ul>
+            </div>
             
-            <CardBody>
-              <p className="character-selection__description">
-                {getCharacterDescription(selectedCharacter)}
-              </p>
-              
-              {/* Mini aperçu des stats */}
-              <div className="character-selection__quick-stats">
-                <div className="quick-stat">
-                  <span className="quick-stat__label">❤️ PV</span>
-                  <span className="quick-stat__value">{selectedCharacter.maxHP}</span>
-                </div>
-                <div className="quick-stat">
-                  <span className="quick-stat__label">🛡️ CA</span>
-                  <span className="quick-stat__value">{selectedCharacter.ac}</span>
-                </div>
-                <div className="quick-stat">
-                  <span className="quick-stat__label">⚡ Initiative</span>
-                  <span className="quick-stat__value">
-                    +{Math.floor((selectedCharacter.stats.dexterite - 10) / 2)}
-                  </span>
-                </div>
-              </div>
-            </CardBody>
-            
-            <CardFooter>
-              <div className="character-selection__actions">
-                <Button
-                  variant="secondary"
-                  onClick={() => handlePreviewCharacter(selectedCharacter)}
-                >
-                  👁️ Voir les détails
-                </Button>
-                
-                <Button
-                  variant="primary"
-                  onClick={handleConfirmSelection}
-                  loading={isConfirming}
-                  disabled={!selectedCharacter}
-                  size="large"
-                >
-                  {isConfirming ? 'Préparation...' : '🚀 Commencer l\'aventure !'}
-                </Button>
-              </div>
-            </CardFooter>
-          </Card>
-        </div>
-      )}
-
-      {!selectedCharacter && (
-        <div className="character-selection__help">
-          <Card variant="ghost" className="character-selection__help-card">
-            <CardBody>
-              <p>
-                👆 Clique sur un personnage pour le sélectionner, ou sur "Voir les détails" 
-                pour examiner ses caractéristiques complètes.
-              </p>
-            </CardBody>
-          </Card>
-        </div>
-      )}
-
-      {/* Modal de prévisualisation */}
-      <Modal type="character-preview" size="large" title="Aperçu du personnage">
-        {({ data: character, onClose }) => (
-          <div className="character-preview-modal">
-            {character && (
-              <>
-                <div className="character-preview-modal__header">
-                  <h2>
-                    {getClassIcon(character.class)} {character.name}
-                  </h2>
-                  <p>{character.level}e niveau {character.race} {character.class}</p>
-                </div>
-                
-                <div className="character-preview-modal__content">
-                  <div className="character-preview-modal__description">
-                    <p>{getCharacterDescription(character)}</p>
-                  </div>
-                  
-                  <div className="character-preview-modal__sheet">
-                    <CompactCharacterSheet characterData={character} />
-                  </div>
-                </div>
-                
-                <div className="character-preview-modal__actions">
-                  <Button variant="secondary" onClick={onClose}>
-                    Fermer
-                  </Button>
-                  
-                  <Button
-                    variant="primary"
-                    onClick={() => {
-                      setSelectedCharacter(character)
-                      onClose()
-                    }}
-                  >
-                    Choisir ce personnage
-                  </Button>
-                </div>
-              </>
-            )}
+            <div className="equipment-column">
+              <h4>Équipement</h4>
+              <ul>
+                {selectedCharacter.weapons?.map((weapon, idx) => (
+                  <li key={idx}>🗡️ {weapon}</li>
+                ))}
+                {selectedCharacter.spellcasting?.cantrips?.map((spell, idx) => (
+                  <li key={idx}>✨ {spell}</li>
+                ))}
+              </ul>
+            </div>
           </div>
-        )}
-      </Modal>
+
+          <button 
+            className="confirm-selection-btn"
+            onClick={handleConfirmSelection}
+          >
+            Commencer l'Aventure avec {selectedCharacter.name}
+          </button>
+        </div>
+      )}
     </div>
   )
 }

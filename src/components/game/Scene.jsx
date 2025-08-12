@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { useTypedText } from '../hooks/useTypedText';
+import { useTypedText } from '../../hooks/useTypedText';
 
 const ChoiceButton = React.memo(({ choice, onChoice }) => {
   const handleClick = useCallback(() => {
@@ -14,7 +14,7 @@ const ChoiceButton = React.memo(({ choice, onChoice }) => {
   );
 });
 
-const Scene = ({ text, choices = [], onChoice }) => {
+export const Scene = ({ text, choices = [], onChoice }) => {
   const { displayedText, isTyping, skipTyping } = useTypedText(text);
 
   const handleTextClick = useCallback(() => {
